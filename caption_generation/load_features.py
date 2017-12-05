@@ -43,7 +43,7 @@ def extract_features(directory):
 
 
 # extract features from all images
-directory = 'Flicker8k_Dataset'
+directory = '/usr/local/src/data/Flickr8k/Flicker8k_Dataset'
 vgg_features = extract_features(directory)
 print('Extracted Features: %d' % len(vgg_features))
 # save to file
