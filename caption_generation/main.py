@@ -6,7 +6,6 @@ from pickle import load
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
-from keras.utils import plot_model
 from keras.models import Model
 from keras.layers import Input
 from keras.layers import Dense
@@ -15,8 +14,6 @@ from keras.layers import Embedding
 from keras.layers import Dropout
 from keras.layers.merge import add
 from keras.callbacks import ModelCheckpoint
-
-_DIRECTORY = 'Flicker8k_Dataset'
 
 
 def load_doc(filename):
@@ -150,14 +147,15 @@ def load_clean_descriptions(filename, dataset):
 
 
 def load_photo_features(filename, dataset):
-    """load photo features.
+    """Load photo features from pkl file..
 
 
     :param filename:
     :param dataset:
     :return:
     """
-    # load all features
+
+    # Load all features.
     all_features = load(open(filename, 'rb'))
     # filter features
     features = {k: all_features[k] for k in dataset}
@@ -191,6 +189,14 @@ def create_tokenizer(descriptions):
 def create_sequences(tokenizer, max_length, descriptions, photos):
     """Creates sequences of images, input sequences and output words for an image.
 
+    X1,		X2 (text sequence), 						y (word)
+    photo	startseq, 									little
+    photo	startseq, little,							girl
+    photo	startseq, little, girl, 					running
+    photo	startseq, little, girl, running, 			in
+    photo	startseq, little, girl, running, in, 		field
+    photo	startseq, little, girl, running, in, field, endseq
+
     :param tokenizer:
     :param max_length:
     :param descriptions:
@@ -199,8 +205,8 @@ def create_sequences(tokenizer, max_length, descriptions, photos):
     """
     X1, X2, y = [], [], []
     # Walk through each image identifier.
-    for key, desc_list in descriptions.items():
-        # walk through each description for the image
+    for desc_key, desc_list in descriptions.iteritems():
+        # Walk through each description for the image.
         for desc in desc_list:
             # Encode the sequence.
             seq = tokenizer.texts_to_sequences([desc])[0]
@@ -212,8 +218,8 @@ def create_sequences(tokenizer, max_length, descriptions, photos):
                 in_seq = pad_sequences([in_seq], maxlen=max_length)[0]
                 # Encode output sequence
                 out_seq = to_categorical([out_seq], num_classes=vocab_size)[0]
-                # store.
-                X1.append(photos[key][0])
+                # Store.
+                X1.append(photos[desc_key][0])
                 X2.append(in_seq)
                 y.append(out_seq)
     return array(X1), array(X2), array(y)
@@ -252,29 +258,28 @@ def define_model(vocab_size, max_length):
     # Tie it together [image, seq] [word]
     model = Model(inputs=[inputs1, inputs2], outputs=outputs)
     model.compile(loss='categorical_crossentropy', optimizer='adam')
-    # Summarize model
+    # Summarize model.
     print(model.summary())
-    # plot_model(model, to_file='model.png', show_shapes=True)
     return model
 
 
 # Train dataset:
 
-# Loads training dataset (6K).
-train_images_filename = 'Flickr8k_text/Flickr_8k.trainImages.txt'
+# Loads training dataset (6K). File contains list of images by name.
+train_images_filename = '/usr/local/src/data/Flickr8k/Flickr_8k.trainImages.txt'
 train = load_set(train_images_filename)
-print('Dataset: %d images.' % len(train))
+print('Dataset: %d train images.' % len(train))
 
-# Load Descriptions.
+# Load Descriptions. File contains image + text description. Many text descriptions per image.
 train_descriptions = load_clean_descriptions('descriptions.txt', train)
 print('Descriptions: train=%d' % len(train_descriptions))
 
-# prepare tokenizer
+# Prepare tokenizer.
 tokenizer = create_tokenizer(train_descriptions)
 vocab_size = len(tokenizer.word_index) + 1
 print('Vocabulary Size: %d' % vocab_size)
 
-# Photo features.
+# Load photo features from .pkl model created from load_features.py.
 train_features = load_photo_features('features.pkl', train)
 print('Photos: train=%d' % len(train_features))
 
@@ -282,34 +287,34 @@ print('Photos: train=%d' % len(train_features))
 max_length = max_length(train_descriptions)
 print('Description Length: %d' % max_length)
 
-# Prepare sequences.
+# Prepare text sequences.
 X1train, X2train, ytrain = create_sequences(tokenizer, max_length, train_descriptions, train_features)
 
-# dev dataset:
+# Dev dataset:
 
 # Load test set.
-test_images_filename = 'Flickr8k_text/Flickr_8k.devImages.txt'
-test = load_set(test_images_filename)
-print('Dataset: %d' % len(test))
+dev_images_filename = '/usr/local/src/data/Flickr8k/Flickr_8k.devImages.txt'
+dev = load_set(dev_images_filename)
+print('Dataset: %d test images.' % len(dev))
 
 # Descriptions.
-test_descriptions = load_clean_descriptions('descriptions.txt', test)
-print('Descriptions: test=%d' % len(test_descriptions))
+dev_descriptions = load_clean_descriptions('descriptions.txt', dev)
+print('Descriptions: test=%d' % len(dev_descriptions))
 
 # Photo features.
-test_features = load_photo_features('features.pkl', test)
-print('Photos: test=%d' % len(test_features))
+dev_features = load_photo_features('features.pkl', dev)
+print('Photos: test=%d' % len(dev_features))
 
 # Prepare sequences.
-X1test, X2test, ytest = create_sequences(tokenizer, max_length, test_descriptions, test_features)
+X1test, X2test, ytest = create_sequences(tokenizer, max_length, dev_descriptions, dev_features)
 
 # Fits Model:
 
 # Define the model.
 model = define_model(vocab_size, max_length)
-# define checkpoint callback
-filepath = 'model-ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5'
-checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+# Define checkpoint callback.
+file_path = 'model-ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5'
+checkpoint = ModelCheckpoint(file_path, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
 # Fit model.
 model.fit([X1train, X2train], ytrain, epochs=20, verbose=2, callbacks=[checkpoint],
