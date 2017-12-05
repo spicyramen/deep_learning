@@ -13,12 +13,13 @@ def extract_features(directory):
     :param directory:
     :return:
     """
-    # Load the model.
+    # Load the model Oxford Model.
     model = VGG16()
     # Re-structure the model.
+    # Remove the last layer from the loaded model, as this is the model used to predict a classification for a photo.
     model.layers.pop()
     model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
-    # Summarize.
+    # Summarize Model.
     print(model.summary())
     # Extract features from each photo.
     features = {}
@@ -41,10 +42,12 @@ def extract_features(directory):
         print('>%s' % name)
     return features
 
-
-# extract features from all images
+# Directory and file information.
 directory = '/usr/local/src/data/Flickr8k/Flicker8k_Dataset'
+file_pickl = 'features.pkl'
+
+# Extract features from all images.
 vgg_features = extract_features(directory)
 print('Extracted Features: %d' % len(vgg_features))
-# save to file
-dump(vgg_features, open('features.pkl', 'wb'))
+# Save to file.
+dump(vgg_features, open(file_pickl, 'wb'))

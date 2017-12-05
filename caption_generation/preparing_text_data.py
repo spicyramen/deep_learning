@@ -21,7 +21,7 @@ def load_descriptions(doc):
     mapping = {}
     # Process lines.
     for line in doc.split('\n'):
-        # split line by white space
+        # Split line by white space.
         tokens = line.split()
         if len(line) < 2:
             continue
@@ -31,7 +31,7 @@ def load_descriptions(doc):
         image_id = image_id.split('.')[0]
         # Convert description tokens back to string.
         image_desc = ' '.join(image_desc)
-        # Create the list if needed.
+        # Create the mapping list if needed.
         if image_id not in mapping:
             mapping[image_id] = []
         # Store description.
@@ -48,18 +48,17 @@ def clean_descriptions(descriptions):
     for key, desc_list in descriptions.items():
         for i in range(len(desc_list)):
             desc = desc_list[i]
-            # tokenize
+            # Tokenize.
             desc = desc.split()
-            # convert to lower case
+            # Convert to lower case.
             desc = [word.lower() for word in desc]
-            # remove punctuation from each token
-            #
+            # Remove punctuation from each token.
             desc = [w.translate(None, string.punctuation) for w in desc]
-            # remove hanging 's' and 'a'
+            # Remove hanging 's' and 'a'.
             desc = [word for word in desc if len(word) > 1]
-            # remove tokens with numbers in them
+            # Remove tokens with numbers in them.
             desc = [word for word in desc if word.isalpha()]
-            # store as string
+            # Store as string.
             desc_list[i] = ' '.join(desc)
 
 
@@ -71,7 +70,7 @@ def to_vocabulary(descriptions):
     """
     # Build a list of all description strings.
     all_desc = set()
-    for key in descriptions.keys():
+    for key in descriptions.iterkeys():
         [all_desc.update(d.split()) for d in descriptions[key]]
     return all_desc
 
@@ -84,7 +83,7 @@ def save_descriptions(descriptions, filename):
     :return:
     """
     lines = list()
-    for key, desc_list in descriptions.items():
+    for key, desc_list in descriptions.iteritems():
         for desc in desc_list:
             lines.append(key + ' ' + desc)
     data = '\n'.join(lines)
@@ -94,7 +93,7 @@ def save_descriptions(descriptions, filename):
 
 
 # Load descriptions from Token file.
-doc = load_doc('Flickr8k_text/Flickr8k.token.txt')
+doc = load_doc('/usr/local/src/data/Flickr8k/Flickr8k.token.txt')
 
 # Parse descriptions.
 image_descriptions = load_descriptions(doc)
