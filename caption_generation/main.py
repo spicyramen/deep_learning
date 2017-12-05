@@ -205,7 +205,7 @@ def create_sequences(tokenizer, max_length, descriptions, photos):
     """
     X1, X2, y = [], [], []
     # Walk through each image identifier.
-    for desc_key, desc_list in descriptions.iteritems():
+    for desc_key, desc_list in descriptions.items():
         # Walk through each description for the image.
         for desc in desc_list:
             # Encode the sequence.
