@@ -205,7 +205,7 @@ def create_sequences(tokenizer, max_length, descriptions, photos):
     """
     X1, X2, y = [], [], []
     # Walk through each image identifier.
-    for desc_key, desc_list in descriptions.items():
+    for desc_key, desc_list in descriptions.iteritems():
         # Walk through each description for the image.
         for desc in desc_list:
             # Encode the sequence.
@@ -288,6 +288,7 @@ max_length = max_length(train_descriptions)
 print('Description Length: %d' % max_length)
 
 # Prepare text sequences.
+print('Preparing text sequences for training.')
 X1train, X2train, ytrain = create_sequences(tokenizer, max_length, train_descriptions, train_features)
 
 # Dev dataset:
@@ -306,7 +307,8 @@ dev_features = load_photo_features('features.pkl', dev)
 print('Photos: test=%d' % len(dev_features))
 
 # Prepare sequences.
-X1test, X2test, ytest = create_sequences(tokenizer, max_length, dev_descriptions, dev_features)
+print('Preparing text sequences for dev.')
+X1dev, X2dev, ydev = create_sequences(tokenizer, max_length, dev_descriptions, dev_features)
 
 # Fits Model:
 
@@ -318,4 +320,4 @@ checkpoint = ModelCheckpoint(file_path, monitor='val_loss', verbose=1, save_best
 
 # Fit model.
 model.fit([X1train, X2train], ytrain, epochs=20, verbose=2, callbacks=[checkpoint],
-          validation_data=([X1test, X2test], ytest))
+          validation_data=([X1dev, X2dev], ydev))
