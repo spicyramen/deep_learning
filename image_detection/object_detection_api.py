@@ -25,6 +25,7 @@ PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
 PATH_TO_LABELS = os.path.join('object_detection/data', 'mscoco_label_map.pbtxt')
 
 NUM_CLASSES = 90
+THRESHOLD = 0.5
 
 
 def download_model():
@@ -36,6 +37,7 @@ def download_model():
         file_name = os.path.basename(file.name)
         if 'frozen_inference_graph.pb' in file_name:
             tar_file.extract(file, os.getcwd())
+
 
 # Load a (frozen) Tensorflow model into memory.
 detection_graph = tf.Graph()
@@ -75,15 +77,15 @@ with detection_graph.as_default():
 
 
 # Added to put object in JSON
-class DetectionObject(object):
+class DetectedObject(object):
     def __init__(self):
-        self.name = "webrtcHacks TensorFlow Object Detection REST API"
+        self.name = 'TensorFlow Object Detection REST API'
 
     def to_json(self):
         return json.dumps(self.__dict__)
 
 
-def get_objects(image, threshold=0.5):
+def get_objects(image, threshold=THRESHOLD):
     image_np = load_image_into_numpy_array(image)
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
@@ -97,23 +99,20 @@ def get_objects(image, threshold=0.5):
     boxes = np.squeeze(boxes)
 
     obj_above_thresh = sum(n > threshold for n in scores)
-    print("Detected %s objects in image with a %s score." % (obj_above_thresh, threshold))
-
-    output = []
-
+    detected_objects = []
+    print('Detected: %s objects in image with a %s score.' % (obj_above_thresh, threshold))
     # Add some metadata to the output
-    item = DetectionObject()
-    item.version = "0.0.1"
+    item = DetectedObject()
+    item.version = '0.0.1'
     item.numObjects = obj_above_thresh
     item.threshold = threshold
-    output.append(item)
+    detected_objects.append(item)
 
     for c in range(0, len(classes)):
         class_name = category_index[classes[c]]['name']
         if scores[c] >= threshold:  # Only return confidences equal or greater than the threshold.
-            print(" Object: %s | Score: %s, Coordinates: %s" % (class_name, scores[c], boxes[c]))
-
-            item = DetectionObject()
+            print('Object: [%s] Score: (%s) Coordinates: %s' % (class_name, scores[c], boxes[c]))
+            item = DetectedObject()
             item.name = 'Object'
             item.class_name = class_name
             item.score = float(scores[c])
@@ -121,7 +120,7 @@ def get_objects(image, threshold=0.5):
             item.x = float(boxes[c][1])
             item.height = float(boxes[c][2])
             item.width = float(boxes[c][3])
-            output.append(item)
+            detected_objects.append(item)
 
-    json_output = json.dumps([ob.__dict__ for ob in output])
+    json_output = json.dumps([detected_object.__dict__ for detected_object in detected_objects])
     return json_output

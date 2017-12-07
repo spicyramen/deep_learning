@@ -27,3 +27,14 @@ Run in folder:
 ```
 protoc object_detection/protos/*.proto --python_out=.
 ```
+
+## Customization
+
+Modify object_recognition folder.
+Get the folder from Tensorflow models.
+
+[Tensorflow models][https://github.com/tensorflow/models/tree/master/research]
+
+## Web server
+
+curl -F "image=@./object_detection/test_images/image1.jpg" http://localhost:8081/image | python -m json.tool
