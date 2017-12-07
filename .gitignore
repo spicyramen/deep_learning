@@ -9,6 +9,9 @@ caption_generation/Flicker8K_text/*
 caption_generation/Flicker8K_Dataset.zip
 caption_generation/Flicker8K_text.zip
 
+# Image detection
+image_detection/object_detection/*
+
 #Visual Studio files
 *.[Oo]bj
 *.user
