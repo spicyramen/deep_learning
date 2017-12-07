@@ -61,13 +61,13 @@ function drawBoxes(objects) {
     });
 }
 
-//Add file blob to a form and post
+// Add file blob to a form and post.
 function postFile(file) {
 
-    //Set options as form data
-    let formdata = new FormData();
-    formdata.append("image", file);
-    formdata.append("threshold", scoreThreshold);
+    //Set options as form data.
+    let form_data = new FormData();
+    form_data.append("image", file);
+    form_data.append("threshold", scoreThreshold);
 
     let xhr = new XMLHttpRequest();
     xhr.open('POST', apiServer, true);
@@ -76,45 +76,45 @@ function postFile(file) {
             let objects = JSON.parse(this.response);
             //console.log(objects);
 
-            //draw the boxes
+            // Draw the boxes.
             drawBoxes(objects);
 
-            //dispatch an event
+            // Dispatch an event.
             let event = new CustomEvent('objectDetection', {detail: objects});
             document.dispatchEvent(event);
 
-            //start over
+            // Start over.
             sendImageFromCanvas();
         }
         else {
             console.error(xhr);
         }
     };
-    xhr.send(formdata);
+    xhr.send(form_data);
 }
 
 
-//Function to measure the change in an image
+// Function to measure the change in an image.
 //TODO: improve this - convert to greyscale
 function imageChange(sourceCtx, changeThreshold) {
 
     let changedPixels = 0;
-    const threshold = changeThreshold * sourceCtx.canvas.width * sourceCtx.canvas.height;   //the number of pixes that change change
+    const threshold = changeThreshold * sourceCtx.canvas.width * sourceCtx.canvas.height;   //the number of pixes that changed.
 
     let currentFrame = sourceCtx.getImageData(0, 0, sourceCtx.canvas.width, sourceCtx.canvas.height).data;
 
-    //handle the first frame
+    // Handle the first frame.
     if (lastFrameData === null) {
         lastFrameData = currentFrame;
         return true;
     }
 
-    //look for the number of pixels that changed
+    // Look for the number of pixels that changed.
     for (let i = 0; i < currentFrame.length; i += 4) {
         let lastPixelValue = lastFrameData[i] + lastFrameData[i + 1] + lastFrameData[i + 2];
         let currentPixelValue = currentFrame[i] + currentFrame[i + 1] + currentFrame[i + 2];
 
-        //see if the change in the current and last pixel is greater than 10; 0 was too sensitive
+        // See if the change in the current and last pixel is greater than 10; 0 was too sensitive.
         if (Math.abs(lastPixelValue - currentPixelValue) > (10)) {
             changedPixels++
         }
@@ -128,7 +128,7 @@ function imageChange(sourceCtx, changeThreshold) {
 }
 
 
-//Check if the image has changed & enough time has passeed sending it to the API.
+// Check if the image has changed & enough time has passed before sending it to the API.
 function sendImageFromCanvas() {
 
     imageCtx.drawImage(v, 0, 0, v.videoWidth, v.videoHeight, 0, 0, uploadWidth, uploadWidth * (v.videoHeight / v.videoWidth));
@@ -145,41 +145,41 @@ function sendImageFromCanvas() {
     }
 }
 
-//Start object detection
+// Start object detection.
 function startObjectDetection() {
 
-    console.log("Starting object detection");
+    console.log("Starting object detection.");
 
-    //Set canvas sizes base don input video.
+    // Set canvas sizes base don input video.
     drawCanvas.width = v.videoWidth;
     drawCanvas.height = v.videoHeight;
 
     imageCanvas.width = uploadWidth;
     imageCanvas.height = uploadWidth * (v.videoHeight / v.videoWidth);
 
-    //Some styles for the drawcanvas.
+    // Some styles for the drawcanvas.
     drawCtx.lineWidth = 4;
-    drawCtx.strokeStyle = "cyan";
+    drawCtx.strokeStyle = "green";
     drawCtx.font = "20px Verdana";
-    drawCtx.fillStyle = "cyan";
+    drawCtx.fillStyle = "green";
 
-    //Now see if we should send an image.
+    // Now see if we should send an image.
     sendImageFromCanvas();
 }
 
-//Starting events
+// Starting events.
 
-//check if metadata is ready - we need the video size
+// Check if metadata is ready - we need the video size.
 v.onloadedmetadata = () => {
-    console.log("Video metadata ready");
+    console.log("Video metadata ready.");
     gotMetadata = true;
     if (isPlaying)
         startObjectDetection();
 };
 
-//see if the video has started playing
+// See if the video has started playing.
 v.onplaying = () => {
-    console.log("Video playing");
+    console.log("Video playing.");
     isPlaying = true;
     if (gotMetadata) {
         startObjectDetection();

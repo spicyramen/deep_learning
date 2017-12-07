@@ -1,4 +1,4 @@
-//Get camera video
+//Get camera video.
 const constraints = {
     audio: false,
     video: {
@@ -11,7 +11,6 @@ navigator.mediaDevices.getUserMedia(constraints)
     .then(stream => {
         document.getElementById("LocalVideo").srcObject = stream;
         console.log("Got local user video");
-
     })
     .catch(err => {
         console.log('navigator.getUserMedia error: ', err)
