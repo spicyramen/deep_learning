@@ -15,6 +15,9 @@ from keras.layers import Dropout
 from keras.layers.merge import add
 from keras.callbacks import ModelCheckpoint
 
+# '/usr/local/src/data/Flickr8k/'
+_FOLDER = 'Flickr8k_text/'
+
 
 def load_doc(filename):
     """Load doc into memory.
@@ -266,7 +269,7 @@ def define_model(vocab_size, max_length):
 # Train dataset:
 
 # Loads training dataset (6K). File contains list of images by name.
-train_images_filename = '/usr/local/src/data/Flickr8k/Flickr_8k.trainImages.txt'
+train_images_filename = _FOLDER + 'Flickr_8k.trainImages.txt'
 train = load_set(train_images_filename)
 print('Dataset: %d train images.' % len(train))
 
@@ -294,7 +297,7 @@ X1train, X2train, ytrain = create_sequences(tokenizer, max_length, train_descrip
 # Dev dataset:
 
 # Load test set.
-dev_images_filename = '/usr/local/src/data/Flickr8k/Flickr_8k.devImages.txt'
+dev_images_filename = _FOLDER + 'Flickr_8k.devImages.txt'
 dev = load_set(dev_images_filename)
 print('Dataset: %d test images.' % len(dev))
 

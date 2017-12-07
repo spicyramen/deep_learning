@@ -6,6 +6,10 @@ from keras.preprocessing.image import img_to_array
 from keras.applications.vgg16 import preprocess_input
 from keras.models import Model
 
+# Directory and file information.
+_FOLDER = '/usr/local/src/data/Flickr8k/Flicker8k_Dataset'
+_PKL_FILE = 'features.pkl'
+
 
 def extract_features(directory):
     """Extract features from each photo in the directory.
@@ -42,12 +46,9 @@ def extract_features(directory):
         print('>%s' % name)
     return features
 
-# Directory and file information.
-directory = '/usr/local/src/data/Flickr8k/Flicker8k_Dataset'
-file_pickl = 'features.pkl'
 
 # Extract features from all images.
-vgg_features = extract_features(directory)
+vgg_features = extract_features(_FOLDER)
 print('Extracted Features: %d' % len(vgg_features))
 # Save to file.
-dump(vgg_features, open(file_pickl, 'wb'))
+dump(vgg_features, open(_PKL_FILE, 'wb'))
