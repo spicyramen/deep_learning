@@ -1,6 +1,6 @@
 import string
 
-from numpy import array
+import numpy as np
 from pickle import load
 
 from keras.preprocessing.text import Tokenizer
@@ -16,7 +16,7 @@ from keras.layers.merge import add
 from keras.callbacks import ModelCheckpoint
 
 # '/usr/local/src/data/Flickr8k/'
-_FOLDER = 'Flickr8k_text/'
+_FOLDER = '/usr/local/src/data/Flickr8k/'
 
 
 def load_doc(filename):
@@ -200,7 +200,7 @@ def create_sequences(tokenizer, max_length, descriptions, photos):
     photo	startseq, little, girl, running, in, 		field
     photo	startseq, little, girl, running, in, field, endseq
 
-    :param tokenizer:
+    :param tokenizer: A Keras Tokenizer
     :param max_length:
     :param descriptions:
     :param photos:
@@ -219,13 +219,13 @@ def create_sequences(tokenizer, max_length, descriptions, photos):
                 in_seq, out_seq = seq[:i], seq[i]
                 # Pad input sequence.
                 in_seq = pad_sequences([in_seq], maxlen=max_length)[0]
-                # Encode output sequence
+                # Encode output sequence.
                 out_seq = to_categorical([out_seq], num_classes=vocab_size)[0]
                 # Store.
                 X1.append(photos[desc_key][0])
                 X2.append(in_seq)
                 y.append(out_seq)
-    return array(X1), array(X2), array(y)
+    return np.array(X1), np.array(X2), np.array(y)
 
 
 def max_length(descriptions):
@@ -292,10 +292,9 @@ print('Description Length: %d' % max_length)
 
 # Prepare text sequences.
 print('Preparing text sequences for training.')
-X1train, X2train, ytrain = create_sequences(tokenizer, max_length, train_descriptions, train_features)
+train_x1, train_x2, train_y = create_sequences(tokenizer, max_length, train_descriptions, train_features)
 
-# Dev dataset:
-
+# Dev dataset
 # Load test set.
 dev_images_filename = _FOLDER + 'Flickr_8k.devImages.txt'
 dev = load_set(dev_images_filename)
@@ -313,8 +312,7 @@ print('Photos: test=%d' % len(dev_features))
 print('Preparing text sequences for dev.')
 X1dev, X2dev, ydev = create_sequences(tokenizer, max_length, dev_descriptions, dev_features)
 
-# Fits Model:
-
+# Fits Model.
 # Define the model.
 model = define_model(vocab_size, max_length)
 # Define checkpoint callback.
@@ -322,5 +320,5 @@ file_path = 'model-ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5'
 checkpoint = ModelCheckpoint(file_path, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
 # Fit model.
-model.fit([X1train, X2train], ytrain, epochs=20, verbose=2, callbacks=[checkpoint],
+model.fit([train_x1, train_x2], train_y, epochs=20, verbose=2, callbacks=[checkpoint],
           validation_data=([X1dev, X2dev], ydev))
