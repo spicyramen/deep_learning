@@ -8,7 +8,7 @@ from keras.models import Model
 
 # Directory and file information.
 _ROOT = '/usr/local/src/data/Flickr8k/'
-_FOLDER = _ROOT + 'Flickr8k_images'
+_FOLDER = _ROOT + 'Flickr8k_images/'
 _PKL_FILE = 'features.pkl'
 
 
