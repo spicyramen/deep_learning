@@ -7,7 +7,8 @@ from keras.applications.vgg16 import preprocess_input
 from keras.models import Model
 
 # Directory and file information.
-_FOLDER = '/usr/local/src/data/Flickr8k/Flicker8k_Dataset'
+_ROOT = '/usr/local/src/data/Flickr8k/'
+_FOLDER = _ROOT + 'Flickr8k_images'
 _PKL_FILE = 'features.pkl'
 
 

@@ -15,8 +15,8 @@ from keras.layers import Dropout
 from keras.layers.merge import add
 from keras.callbacks import ModelCheckpoint
 
-# '/usr/local/src/data/Flickr8k/'
-_FOLDER = '/usr/local/src/data/Flickr8k/'
+_ROOT = '/usr/local/src/data/Flickr8k/'
+_FOLDER = _ROOT + 'Flickr8k_text'
 
 
 def load_doc(filename):
