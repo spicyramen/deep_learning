@@ -1,0 +1,6 @@
+__author__ = "Gonzalo Gasca Meza"
+__copyright__ = "Copyright 2016, Google"
+__version__ = "1.0.1"
+__maintainer__ = "Gonzalo Gasca Meza"
+__email__ = "gogasca@google.com"
+__status__ = "Production"
