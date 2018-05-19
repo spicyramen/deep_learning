@@ -5,8 +5,8 @@ import tarfile
 import tensorflow as tf
 import json
 
-if tf.__version__ != '1.4.0':
-    raise ImportError('Please upgrade your Tensorflow installation to v1.4.0!')
+if tf.__version__ != '1.6.0':
+    raise ImportError('Please upgrade your Tensorflow installation to v1.6.0!')
 
 # Object detection imports.
 from object_detection.utils import label_map_util
@@ -17,7 +17,8 @@ MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 MODEL_FILE = MODEL_NAME + '.tar.gz'
 DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
 
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
+# Path to frozen detection graph. This is the actual model that is used for
+# the object detection.
 
 PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
 
@@ -67,16 +68,20 @@ with detection_graph.as_default():
     with tf.Session(graph=detection_graph) as sess:
         # Definite input and output Tensors for detection_graph
         image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
-        # Each box represents a part of the image where a particular object was detected.
-        detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+        # Each box represents a part of the image where a particular object
+        # was detected.
+        detection_boxes = detection_graph.get_tensor_by_name(
+            'detection_boxes:0')
         # Each score represent how level of confidence for each of the objects.
         # Score is shown on the result image, together with the class label.
-        detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
-        detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
+        detection_scores = detection_graph.get_tensor_by_name(
+            'detection_scores:0')
+        detection_classes = detection_graph.get_tensor_by_name(
+            'detection_classes:0')
         num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
 
-# Added to put object in JSON
+# Added to put object in JSON.
 class DetectedObject(object):
     def __init__(self):
         self.name = 'TensorFlow Object Detection REST API'
@@ -86,8 +91,17 @@ class DetectedObject(object):
 
 
 def get_objects(image, threshold=THRESHOLD):
+    """
+
+    Args:
+        image: (Image Object)
+        threshold (float)
+
+    Returns:
+
+    """
     image_np = load_image_into_numpy_array(image)
-    # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+    # Expand dimensions. Model expects images to have shape: [1, None, None, 3].
     image_np_expanded = np.expand_dims(image_np, axis=0)
     # Actual detection.
     (boxes, scores, classes, num) = sess.run(
@@ -100,7 +114,8 @@ def get_objects(image, threshold=THRESHOLD):
 
     obj_above_thresh = sum(n > threshold for n in scores)
     detected_objects = []
-    print('Detected: %s objects in image with a %s score.' % (obj_above_thresh, threshold))
+    print('Detected: %s objects in image with a %s score.' % (
+    obj_above_thresh, threshold))
     # Add some metadata to the output
     item = DetectedObject()
     item.version = '0.0.1'
@@ -110,8 +125,10 @@ def get_objects(image, threshold=THRESHOLD):
 
     for c in range(0, len(classes)):
         class_name = category_index[classes[c]]['name']
-        if scores[c] >= threshold:  # Only return confidences equal or greater than the threshold.
-            print('Object: [%s] Score: (%s) Coordinates: %s' % (class_name, scores[c], boxes[c]))
+        # Only return confidences equal or greater than the threshold.
+        if scores[c] >= threshold:
+            print('Object: [%s] Score: (%s) Coordinates: %s' % (
+            class_name, scores[c], boxes[c]))
             item = DetectedObject()
             item.name = 'Object'
             item.class_name = class_name
@@ -122,5 +139,6 @@ def get_objects(image, threshold=THRESHOLD):
             item.width = float(boxes[c][3])
             detected_objects.append(item)
 
-    json_output = json.dumps([detected_object.__dict__ for detected_object in detected_objects])
+    json_output = json.dumps(
+        [detected_object.__dict__ for detected_object in detected_objects])
     return json_output
